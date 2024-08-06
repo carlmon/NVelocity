@@ -166,22 +166,46 @@ namespace NVelocity.Util.Introspection
 			// map and cache them
 			foreach(MethodInfo method in methods)
 			{
-				methodMap.Add(method);
-				methodCache[MakeMethodKey(method)] = method;
+				// skip unsafe types
+				if (IsSafeReflectedProperty(type, method.ReturnType))
+				{
+					methodMap.Add(method);
+					methodCache[MakeMethodKey(method)] = method;
+				}
 			}
 		}
 
 		private void PopulatePropertyCache()
 		{
-			// get all publicly accessible methods
+			// get all publicly accessible properties
 			PropertyInfo[] properties = GetAccessibleProperties(type);
 
 			// map and cache them
 			foreach(PropertyInfo property in properties)
 			{
-				//propertyMap.add(publicProperty);
-				propertyCache[property.Name] = property;
+				// skip unsafe types
+				if (IsSafeReflectedProperty(type, property.PropertyType))
+				{
+					//propertyMap.add(publicProperty);
+					propertyCache[property.Name] = property;
+				}
 			}
+		}
+
+		/// <summary>
+		/// Filter unsafe properties or methods populated to the Map
+		/// </summary>
+		private bool IsSafeReflectedProperty(Type instanceType, Type propertyOrMethodType)
+		{
+			// only allow basic properties, or method return types, on reflected
+			// types (Type, TypeInfo, RuntimeType)
+			if (typeof(Type).IsAssignableFrom(type))
+			{
+				return propertyOrMethodType.IsPrimitive ||
+					propertyOrMethodType.Equals(typeof(string));
+			}
+
+			return true;
 		}
 
 		/// <summary>
