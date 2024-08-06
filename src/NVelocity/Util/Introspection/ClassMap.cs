@@ -166,6 +166,9 @@ namespace NVelocity.Util.Introspection
 			// map and cache them
 			foreach(MethodInfo method in methods)
 			{
+				if (method.Name == "GetType" || method.ReturnType == typeof(Type))
+					continue;
+
 				methodMap.Add(method);
 				methodCache[MakeMethodKey(method)] = method;
 			}
@@ -179,6 +182,9 @@ namespace NVelocity.Util.Introspection
 			// map and cache them
 			foreach(PropertyInfo property in properties)
 			{
+				if (property.PropertyType == typeof(Type))
+					continue;
+
 				//propertyMap.add(publicProperty);
 				propertyCache[property.Name] = property;
 			}
